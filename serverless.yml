@@ -38,16 +38,29 @@ functions:
           path: /comments/get-multiple
           method: post
   
-# resources:
-#   Resources:
-#     CommentsTable:
-#       Type: AWS::DynamoDB::Table
-#       Properties:
-#         TableName: Comments
-#         AttributeDefinitions:
-#           - AttributeName: ID
-#             AttributeType: N
-#         KeySchema:
+resources:
+  Resources:
+    CommentsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: CommentsTable
+        AttributeDefinitions:
+          -
+            AttributeName: ID
+            AttributeType: N
+          -
+            AttributeName: target
+            AttributeType: S
+        KeySchema:
+          - 
+            AttributeName: target
+            KeyType: HASH
+          -
+            AttributeName: ID
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
             
           
