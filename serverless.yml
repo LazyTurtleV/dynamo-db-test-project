@@ -1,0 +1,54 @@
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    noPrependStageInUrl: true
+
+service: comments-cloud
+
+frameworkVersion: ">=1.1.0"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-east-1
+
+functions:
+  createComment:
+    name: db-create-comment
+    handler: API/handler.addComment
+    events:
+      - http:
+          path: /comments/create
+          method: post
+  getComment:
+    name: db-get-comment
+    handler: API/handler.getComment
+    events:
+      - http:
+          path: /comments/get-one
+          method: post
+  getComments:
+    name: db-get-multiple-comments
+    handler: API/handler.getComments
+    events:
+      - http:
+          path: /comments/get-multiple
+          method: post
+  
+# resources:
+#   Resources:
+#     CommentsTable:
+#       Type: AWS::DynamoDB::Table
+#       Properties:
+#         TableName: Comments
+#         AttributeDefinitions:
+#           - AttributeName: ID
+#             AttributeType: N
+#         KeySchema:
+
+            
+          
+  
