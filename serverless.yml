@@ -23,7 +23,7 @@ provider:
   region: us-east-1
   environment:
     TABLE_NAME: CommentsTable
-    STAGE: DEV
+    PROJECT_CONFIGURATION: DEV
 
 functions:
   createComment:
@@ -56,17 +56,17 @@ resources:
         TableName: CommentsTable
         AttributeDefinitions:
           -
-            AttributeName: ID
+            AttributeName: comment_id
             AttributeType: S
           -
-            AttributeName: target
+            AttributeName: comment_target
             AttributeType: S
         KeySchema:
           - 
-            AttributeName: target
+            AttributeName: comment_target
             KeyType: HASH
           -
-            AttributeName: ID
+            AttributeName: comment_id
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1

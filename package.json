@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serv": "serverless offline",
+    "db": "serverless dynamodb start",
+    "dev": "start npm run serv && start npm run db"
   },
   "author": "VAS",
   "license": "ISC",
