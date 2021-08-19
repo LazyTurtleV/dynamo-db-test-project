@@ -83,8 +83,31 @@ module.exports.getComment = async (req, res) =>{
 }
 
 module.exports.getComments = async (req, res) =>{
-    return {
+    let body = JSON.parse(req.body);
+    
+    let response = {
         statusCode: 200,
-        body: "Get comments!"
+        body: null
     }
+
+    let params = {
+        TableName: process.env.TABLE_NAME,
+        KeyConditionExpression: "comment_target = :hkey",
+        ExpressionAttributeValues: {
+            ":hkey": body.target
+        }
+    }
+
+    try{
+        response.body = JSON.stringify(await docClient.query(params).promise());
+    }catch(e){
+        response.body = JSON.stringify({
+            errorMessage: e.message,
+            ...params
+        })
+
+        response.statusCode = 500;
+    }
+    
+    return response
 }
