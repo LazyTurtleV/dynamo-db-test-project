@@ -44,7 +44,7 @@ module.exports.addComment = async (req, res) =>{
             errorMessage: e.message,
             ...params
         })
-        
+
         response.statusCode = 500;
     }
 
@@ -53,10 +53,33 @@ module.exports.addComment = async (req, res) =>{
 }
 
 module.exports.getComment = async (req, res) =>{
-    return {
+    let body = JSON.parse(req.body);
+    
+    let response = {
         statusCode: 200,
-        body: "Get a comment!"
+        body: null
     }
+
+    let params = {
+        TableName: process.env.TABLE_NAME,
+        Key: {
+            comment_id: body.ID,
+            comment_target: body.target
+        }
+    }
+
+    try{
+        response.body = JSON.stringify(await docClient.get(params).promise());
+    }catch(e){
+        response.body = JSON.stringify({
+            errorMessage: e.message,
+            ...params
+        })
+
+        response.statusCode = 500;
+    }
+    
+    return response
 }
 
 module.exports.getComments = async (req, res) =>{
