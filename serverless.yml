@@ -2,6 +2,8 @@ plugins:
   - serverless-dynamodb-local
   - serverless-offline
 
+service: comments-cloud
+
 custom:
   serverless-offline:
     noPrependStageInUrl: true
@@ -12,7 +14,6 @@ custom:
       port: 8000
       migrate: true
 
-service: comments-cloud
 
 frameworkVersion: ">=1.1.0"
 
@@ -23,7 +24,12 @@ provider:
   region: us-east-1
   environment:
     TABLE_NAME: CommentsTable
-    PROJECT_CONFIGURATION: DEV
+    PROJECT_CONFIGURATION: RES
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:*"
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/*"
 
 functions:
   createComment:
