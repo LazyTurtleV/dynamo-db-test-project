@@ -1,9 +1,16 @@
 plugins:
+  - serverless-dynamodb-local
   - serverless-offline
 
 custom:
   serverless-offline:
     noPrependStageInUrl: true
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      migrate: true
 
 service: comments-cloud
 
@@ -14,6 +21,9 @@ provider:
   runtime: nodejs12.x
   stage: dev
   region: us-east-1
+  environment:
+    TABLE_NAME: CommentsTable
+    STAGE: DEV
 
 functions:
   createComment:
@@ -47,7 +57,7 @@ resources:
         AttributeDefinitions:
           -
             AttributeName: ID
-            AttributeType: N
+            AttributeType: S
           -
             AttributeName: target
             AttributeType: S

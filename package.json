@@ -8,8 +8,13 @@
   },
   "author": "VAS",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "aws-sdk": "^2.970.0",
+    "bluebird": "^3.7.2",
+    "uuid": "^8.3.2"
+  },
   "devDependencies": {
+    "serverless-dynamodb-local": "^0.2.40",
     "serverless-offline": "^8.0.0"
   }
 }
