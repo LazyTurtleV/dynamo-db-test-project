@@ -111,3 +111,26 @@ module.exports.getComments = async (req, res) =>{
     
     return response
 }
+
+module.exports.getAllComments = async req => {
+    let body = JSON.parse(req.body);
+
+    let response = {
+        statusCode: 200,
+        body: null
+    };
+
+    try{
+        let res = await docClient.scan({TableName: process.env.TABLE_NAME}).promise();
+        response.body = JSON.stringify(res.Items);
+    }catch(e){
+        response.body = JSON.stringify({
+            errorMessage: e.message,
+            ...params
+        })
+
+        response.statusCode = 500;
+    }
+
+    return response
+}

@@ -53,6 +53,13 @@ functions:
       - http:
           path: /comments/get-multiple
           method: post
+  getAllComments:
+    name: db-get-all-comments
+    handler: API/handler.getAllComments
+    events:
+      - http:
+          path: /comments/get-all
+          method: get
   
 resources:
   Resources:
