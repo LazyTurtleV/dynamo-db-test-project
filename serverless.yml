@@ -1,4 +1,5 @@
 plugins:
+  - serverless-s3-local
   - serverless-dynamodb-local
   - serverless-offline
 
@@ -25,6 +26,7 @@ provider:
   environment:
     TABLE_NAME: CommentsTable
     PROJECT_CONFIGURATION: RES
+    BUCKET_NAME: photos-bucket
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -60,6 +62,20 @@ functions:
       - http:
           path: /comments/get-all
           method: get
+  uploadToBucket:
+    name: upload-to-bucket
+    handler: API/bucketAPI.upload
+    events:
+      - http:
+          path: /bucket/upload
+          method: post
+  downloadFromBucket:
+    name: download-from-bucket
+    handler: API/bucketAPI.download
+    events:
+      - http:
+          path: /bucket/download
+          method: post
   
 resources:
   Resources:
@@ -84,6 +100,19 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    S3bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: photos-bucket
+        CorsConfiguration:
+          CorstRules:
+            - AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - GET
+                - PUT
+              AllowedOrigins:
+                - "*"
 
             
           
