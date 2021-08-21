@@ -1,21 +1,22 @@
 const AWS = require('aws-sdk');
+let s3Client;
 
 if(process.env.PROJECT_CONFIGURATION === 'DEV'){
-const s3Client = new AWS.S3({
-    s3ForcePathStyle: true,
-    accessKeyId: 'S3RVER', // This specific key is required when working offline
-    secretAccessKey: 'S3RVER',
-    endpoint: new AWS.Endpoint('http://localhost:4569'),
-});
+    s3Client = new AWS.S3({
+        s3ForcePathStyle: true,
+        accessKeyId: 'S3RVER', // This specific key is required when working offline
+        secretAccessKey: 'S3RVER',
+        endpoint: new AWS.Endpoint('http://localhost:4569'),
+    });
 }else{
-    const s3Client = new AWS.S3();
+    s3Client = new AWS.S3();
 }
 
 module.exports.upload = async req => {
     let body = JSON.parse(req.body);
     
     let response = {
-        status: 200,
+        statusCode: 200,
         body: null
     }
 
