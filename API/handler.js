@@ -28,7 +28,7 @@ module.exports.addComment = async (req, res) =>{
             comment_target: body.target,
             comment_author: body.author,
             comment_text: body.text,
-            comment_date: new Date().toString()
+            comment_date: new Date().toISOString()
         }
     }
     
