@@ -105,7 +105,7 @@ resources:
       Properties:
         BucketName: photos-bucket
         CorsConfiguration:
-          CorstRules:
+          CorsRules:
             - AllowedHeaders:
                 - "*"
               AllowedMethods:
