@@ -34,28 +34,28 @@ provider:
 functions:
   createComment:
     name: db-create-comment
-    handler: API/handler.addComment
+    handler: API/comments.addComment
     events:
       - http:
           path: /comments/create
           method: post
   getComment:
     name: db-get-comment
-    handler: API/handler.getComment
+    handler: API/comments.getComment
     events:
       - http:
           path: /comments/get-one
           method: post
   getComments:
     name: db-get-multiple-comments
-    handler: API/handler.getComments
+    handler: API/comments.getComments
     events:
       - http:
           path: /comments/get-multiple
           method: post
   getAllComments:
     name: db-get-all-comments
-    handler: API/handler.getAllComments
+    handler: API/comments.getAllComments
     events:
       - http:
           path: /comments/get-all
