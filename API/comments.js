@@ -1,7 +1,33 @@
 const uuid = require("uuid");
 const docClient = require('../serviceModules/dynamoDBClient')
+const s3Client = require('../serviceModules/S3bucketClient')
 
-module.exports.addComment = async (req, res) =>{
+//input - list of comments
+async function getDownloadUrlsToAttachedImages(commentsList){
+    let objectsList = await s3Client.listObjectsV2({Bucket: process.env.BUCKET_NAME}).promise();
+    let imageUrlsList = new Array();
+
+    for(let comment of commentsList){
+        let pattern = new RegExp(`comment-images\/${comment.comment_id}\/.+`);
+
+        for(obj of objectsList){
+            if(pattern.test(obj.Key))
+                getDownloadUrlsOfComment(obj.Key)
+                .then(data => imageUrlsList.push(data))
+        }
+    }
+
+    return imageUrlsList;
+}
+
+async function getDownloadUrlsOfComment(key){
+    return await s3Client.getSignedUrlPromise('getObject', {
+        Bucket: process.env.BUCKET_NAME,
+        Key: key
+    })
+}
+
+module.exports.addComment = async req =>{
     let body = JSON.parse(req.body);
     
     let response = {
@@ -40,7 +66,7 @@ module.exports.addComment = async (req, res) =>{
     return response
 }
 
-module.exports.getComment = async (req, res) =>{
+module.exports.getComment = async req =>{
     let body = JSON.parse(req.body);
     
     let response = {
@@ -70,7 +96,7 @@ module.exports.getComment = async (req, res) =>{
     return response
 }
 
-module.exports.getComments = async (req, res) =>{
+module.exports.getComments = async req =>{
     let body = JSON.parse(req.body);
     
     let response = {
