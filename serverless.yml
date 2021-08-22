@@ -32,6 +32,16 @@ provider:
       Action:
         - "dynamodb:*"
       Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/*"
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+        - "s3:GetObject"
+      Resource: 
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - "Ref" : "S3bucket"
+            - "/*"
 
 functions:
   createComment:
