@@ -2,22 +2,19 @@ const uuid = require("uuid");
 const docClient = require('../serviceModules/dynamoDBClient')
 const s3Client = require('../serviceModules/S3bucketClient')
 
-//input - list of comments
 async function getDownloadUrlsToAttachedImages(commentsList){
     let objectsList = await s3Client.listObjectsV2({Bucket: process.env.BUCKET_NAME}).promise();
-    let imageUrlsList = new Array();
 
     for(let comment of commentsList){
+        comment.imageUrls = new Array()
         let pattern = new RegExp(`comment-images\/${comment.comment_id}\/.+`);
 
-        for(obj of objectsList){
+        for(obj of Array.from(objectsList)){
             if(pattern.test(obj.Key))
                 getDownloadUrlsOfComment(obj.Key)
-                .then(data => imageUrlsList.push(data))
+                .then(data => comment.imageUrls.push(data))
         }
     }
-
-    return imageUrlsList;
 }
 
 async function getDownloadUrlsOfComment(key){
@@ -83,7 +80,10 @@ module.exports.getComment = async req =>{
     }
 
     try{
-        response.body = JSON.stringify(await docClient.get(params).promise());
+        let comment = await docClient.get(params).promise();
+        await getDownloadUrlsToAttachedImages([comment]);
+
+        response.body = JSON.stringify(comment)
     }catch(e){
         response.body = JSON.stringify({
             errorMessage: e.message,
@@ -113,7 +113,10 @@ module.exports.getComments = async req =>{
     }
 
     try{
-        response.body = JSON.stringify(await docClient.query(params).promise());
+        let comments = await docClient.query(params).promise();
+        await getDownloadUrlsToAttachedImages(comments.Items);
+
+        response.body = JSON.stringify(comments.Items)
     }catch(e){
         response.body = JSON.stringify({
             errorMessage: e.message,
@@ -135,12 +138,13 @@ module.exports.getAllComments = async req => {
     };
 
     try{
-        let res = await docClient.scan({TableName: process.env.TABLE_NAME}).promise();
-        response.body = JSON.stringify(res.Items);
+        let comments = await docClient.scan({TableName: process.env.TABLE_NAME}).promise();
+        await getDownloadUrlsToAttachedImages(comments.Items);
+        
+        response.body = JSON.stringify(comments.Items);
     }catch(e){
         response.body = JSON.stringify({
-            errorMessage: e.message,
-            ...params
+            errorMessage: e.message
         })
 
         response.statusCode = 500;
