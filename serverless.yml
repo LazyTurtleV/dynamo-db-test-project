@@ -86,6 +86,13 @@ functions:
       - http:
           path: /bucket/download
           method: post
+  getUploadUrl:
+    name: get-img-upload-url
+    handler: API/bucketAPI.getUploadUrl
+    events:
+      - http:
+          path: /bucket/upload-url
+          method: post
   
 resources:
   Resources:
