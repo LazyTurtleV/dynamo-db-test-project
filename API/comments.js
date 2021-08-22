@@ -1,19 +1,30 @@
 const uuid = require("uuid");
-const AWS = require('aws-sdk');
-let docClient;
+const docClient = require('../serviceModules/dynamoDBClient')
+const s3Client = require('../serviceModules/S3bucketClient')
 
-//While development db is set to local.
-//On release env var PROJECT_CONF value has to be changed to 'RES' 
-if(process.env.PROJECT_CONFIGURATION === 'DEV'){
-    docClient = new AWS.DynamoDB.DocumentClient({
-        region: 'localhost',
-        endpoint: 'http://localhost:8000'
-    });
-}else{
-    docClient = new AWS.DynamoDB.DocumentClient();
+async function getDownloadUrlsToAttachedImages(commentsList){
+    let objectsList = await s3Client.listObjectsV2({Bucket: process.env.BUCKET_NAME}).promise();
+
+    for(let comment of commentsList){
+        comment.imageUrls = new Array()
+        let pattern = new RegExp(`comment-images\/${comment.comment_id}\/.+`);
+
+        for(obj of Array.from(objectsList)){
+            if(pattern.test(obj.Key))
+                getDownloadUrlsOfComment(obj.Key)
+                .then(data => comment.imageUrls.push(data))
+        }
+    }
 }
 
-module.exports.addComment = async (req, res) =>{
+async function getDownloadUrlsOfComment(key){
+    return await s3Client.getSignedUrlPromise('getObject', {
+        Bucket: process.env.BUCKET_NAME,
+        Key: key
+    })
+}
+
+module.exports.addComment = async req =>{
     let body = JSON.parse(req.body);
     
     let response = {
@@ -52,7 +63,7 @@ module.exports.addComment = async (req, res) =>{
     return response
 }
 
-module.exports.getComment = async (req, res) =>{
+module.exports.getComment = async req =>{
     let body = JSON.parse(req.body);
     
     let response = {
@@ -69,7 +80,10 @@ module.exports.getComment = async (req, res) =>{
     }
 
     try{
-        response.body = JSON.stringify(await docClient.get(params).promise());
+        let comment = await docClient.get(params).promise();
+        await getDownloadUrlsToAttachedImages([comment]);
+
+        response.body = JSON.stringify(comment)
     }catch(e){
         response.body = JSON.stringify({
             errorMessage: e.message,
@@ -82,7 +96,7 @@ module.exports.getComment = async (req, res) =>{
     return response
 }
 
-module.exports.getComments = async (req, res) =>{
+module.exports.getComments = async req =>{
     let body = JSON.parse(req.body);
     
     let response = {
@@ -99,7 +113,10 @@ module.exports.getComments = async (req, res) =>{
     }
 
     try{
-        response.body = JSON.stringify(await docClient.query(params).promise());
+        let comments = await docClient.query(params).promise();
+        await getDownloadUrlsToAttachedImages(comments.Items);
+
+        response.body = JSON.stringify(comments.Items)
     }catch(e){
         response.body = JSON.stringify({
             errorMessage: e.message,
@@ -121,12 +138,13 @@ module.exports.getAllComments = async req => {
     };
 
     try{
-        let res = await docClient.scan({TableName: process.env.TABLE_NAME}).promise();
-        response.body = JSON.stringify(res.Items);
+        let comments = await docClient.scan({TableName: process.env.TABLE_NAME}).promise();
+        await getDownloadUrlsToAttachedImages(comments.Items);
+        
+        response.body = JSON.stringify(comments.Items);
     }catch(e){
         response.body = JSON.stringify({
-            errorMessage: e.message,
-            ...params
+            errorMessage: e.message
         })
 
         response.statusCode = 500;
