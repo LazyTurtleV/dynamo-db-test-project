@@ -23,7 +23,7 @@ module.exports.upload = async req => {
     let params = {
         Bucket: process.env.BUCKET_NAME,
         Key: body.key,
-        Body: body.data
+        Body: JSON.stringify(body.data)
     }
 
     try{
@@ -44,7 +44,7 @@ module.exports.download = async req => {
     let body = JSON.parse(req.body);
     
     let response = {
-        status: 200,
+        statusCode: 200,
         body: null
     }
 
