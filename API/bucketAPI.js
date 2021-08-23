@@ -72,10 +72,12 @@ module.exports.getUploadUrl = async req => {
                 TableName: process.env.TABLE_NAME
             })
         });
-        allComments = JSON.parse(allComments.body)
+        allComments.body = JSON.parse(allComments.body)
         
         //if there is at least one element with specified ID
-        if(!allComments.some(item => item.comment_id === body.commentID))
+        if(allComments.statusCode != 200)
+            throw new Error(`Some error occured on server: ${allComments.body.errorMessage}`);
+        else if(!allComments.body.some(item => item.comment_id === body.commentID))
             throw new Error("Item doesn't exist")
 
 
